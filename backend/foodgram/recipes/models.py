@@ -56,21 +56,20 @@ class Recipe(models.Model):
 
 class IngredientRecipe(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete= models.CASCADE, related_name='IngredientRecipe')
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='RecipeIngredient')
     quantity= models.PositiveIntegerField()
 
 
-class Favourites(models.Model):
+class Favorites(models.Model):
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='client',
         verbose_name='Пользователь',
     )   
-    favourit_recipe= models.ForeignKey(
+    favorit_recipe= models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='favourit_recipes',
+        related_name='favorit_recipes',
         verbose_name='Избранные рецепты'
     )
 
