@@ -13,6 +13,9 @@ class AuthorSerializer(serializers.ModelSerializer):
         fields = (
             'id', 'email', 'username', 'first_name',
             'last_name', 'password', 'is_subscribed',)
+        extra_kwargs = {
+            'password': {'write_only': True, 'required': True},
+        }
 
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
