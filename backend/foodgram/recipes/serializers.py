@@ -1,0 +1,124 @@
+from django.shortcuts import get_object_or_404
+from drf_extra_fields.fields import Base64ImageField
+from recipes import models
+from rest_framework import serializers
+from users.models import ShoppingCart
+from users.serializers import AuthorSerializer
+
+
+class TagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Tag
+        fields = ('id', 'name', 'color', 'slug')
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Ingredient
+        fields = ('id', 'name', 'measurement_unit')
+
+
+class IngredientRecipeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Ingredient
+        fields = ('id', 'name',  'measurement_unit')
+
+
+class PostIngredientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.IngredientRecipe
+        fields = ('id', 'quantity')
+
+
+class GetIngredientSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='ingredient.id')
+    name = serializers.CharField(source='ingredient.name')
+    measurement_unit = serializers.CharField(
+        source='ingredient.measurement_unit'
+        )
+
+    class Meta:
+        model = models.IngredientRecipe
+        fields = ('id', 'name', 'measurement_unit', 'quantity')
+
+
+class GetRecipeSerializer(serializers.ModelSerializer):
+    tags = TagSerializer(many=True)
+    author = AuthorSerializer()
+    ingredients = GetIngredientSerializer(many=True)
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Recipe
+        fields = (
+            'id', 'name', 'tags', 'author', 'ingredients', 'is_favorited',
+            'is_in_shopping_cart', 'image', 'text', 'cooking_time'
+        )
+
+    def get_is_favorited(self, obj):
+        user = self.context['request'].user
+        return (user.is_authenticated and user.client.filter(
+            favorit_recipe=obj).exists()
+            )
+
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context['request'].user
+        try:
+            return (
+                user.is_authenticated and
+                user.shopping_cart.recipes.filter(pk__in=(obj.pk,)).exists()
+            )
+        except ShoppingCart.DoesNotExist:
+            return False
+
+
+class PostRecipeSerializer(serializers.ModelSerializer):
+    ingredients = IngredientRecipeSerializer(many=True)
+    tags = serializers.ListField(
+        child=serializers.SlugRelatedField(
+            slug_field='id',
+            queryset=models.Tag.objects.all(),
+        ),
+    )
+    image = Base64ImageField()
+
+    class Meta:
+        model = models.Recipe
+        fields = (
+            'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time',
+        )
+
+    def add_ingredients_and_tags(self, instance, validated_data):
+        ingredients, tags = (
+            validated_data.pop('ingredients'), validated_data.pop('tags')
+        )
+        for ingredient in ingredients:
+            quantity_of_ingredient, _ = (
+                models.IngredientRecipe.objects.get_or_create(
+                    ingredient=get_object_or_404(
+                        models.Ingredient,
+                        pk=ingredient['id']
+                    ),
+                    quantity=ingredient['quantity'],)
+                )
+            instance.ingredients.add(quantity_of_ingredient)
+        for tag in tags:
+            instance.tags.add(tag)
+        return instance
+
+    def create(self, validated_data):
+        saved = {}
+        saved['ingredients'] = validated_data.pop('ingredients')
+        saved['tags'] = validated_data.pop('tags')
+        recipe = models.Recipe.objects.create(**validated_data)
+        return self.add_ingredients_and_tags(recipe, saved)
+
+    def update(self, instance, validated_data):
+        instance.ingredients.clear()
+        instance.tags.clear()
+        instance = self.add_ingredients_and_tags(instance, validated_data)
+        return super().update(instance, validated_data)
