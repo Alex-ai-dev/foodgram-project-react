@@ -11,22 +11,22 @@ class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'id', 'email', 'username', 'first_name',
-            'last_name', 'password', 'is_subscribed',)
+            "id", "email", "username", "first_name",
+            "last_name", "password", "is_subscribed",)
         extra_kwargs = {
-            'password': {'write_only': True, 'required': True},
+            "password": {"write_only": True, "required": True},
         }
 
     def get_is_subscribed(self, obj):
-        user = self.context['request'].user
+        user = self.context["request"].user
         return (
             user.is_authenticated
             and obj.following.filter(user=user).exists()
         )
 
     def create(self, validated_data):
-        validated_data['password'] = (
-            make_password(validated_data.pop('password'))
+        validated_data["password"] = (
+            make_password(validated_data.pop("password"))
         )
         return super().create(validated_data)
 
@@ -34,7 +34,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 class FavoritRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time',)
+        fields = ("id", "name", "image", "cooking_time",)
 
 
 class FollowSerializer(AuthorSerializer):
@@ -42,7 +42,7 @@ class FollowSerializer(AuthorSerializer):
     recipes_count = serializers.SerializerMethodField()
 
     class Meta(AuthorSerializer.Meta):
-        fields = AuthorSerializer.Meta.fields + ('recipes', 'recipes_count',)
+        fields = AuthorSerializer.Meta.fields + ("recipes", "recipes_count",)
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()

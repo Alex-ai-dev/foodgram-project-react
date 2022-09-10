@@ -10,39 +10,38 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Tag
-        fields = ('id', 'name', 'color', 'slug')
+        fields = ("id", "name", "color", "slug")
 
 
 class IngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Ingredient
-        fields = ('id', 'name', 'measurement_unit')
+        fields = ("id", "name", "measurement_unit")
 
 
-class IngredientRecipeSerializer(serializers.ModelSerializer):
+class GetIngredientRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = models.Ingredient
-        fields = ('id', 'name',  'measurement_unit')
+        model = models.IngredientRecipe
+        fields = ("id", "name",  "measurement_unit")
 
 
 class PostIngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.IngredientRecipe
-        fields = ('id', 'quantity')
+        fields = ("id", "quantity")
 
 
 class GetIngredientSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(source='ingredient.id')
-    name = serializers.CharField(source='ingredient.name')
+    name = serializers.CharField(source="ingredient.name")
     measurement_unit = serializers.CharField(
-        source='ingredient.measurement_unit'
+        source="ingredient.measurement_unit"
         )
 
     class Meta:
         model = models.IngredientRecipe
-        fields = ('id', 'name', 'measurement_unit', 'quantity')
+        fields = ("id", "name", "measurement_unit", "quantity")
 
 
 class GetRecipeSerializer(serializers.ModelSerializer):
@@ -55,18 +54,18 @@ class GetRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Recipe
         fields = (
-            'id', 'name', 'tags', 'author', 'ingredients', 'is_favorited',
-            'is_in_shopping_cart', 'image', 'text', 'cooking_time'
+            "id", "name", "tags", "author", "ingredients", "is_favorited",
+            "is_in_shopping_cart", "image", "text", "cooking_time"
         )
 
     def get_is_favorited(self, obj):
-        user = self.context['request'].user
+        user = self.context["request"].user
         return (user.is_authenticated and user.client.filter(
             favorit_recipe=obj).exists()
             )
 
     def get_is_in_shopping_cart(self, obj):
-        user = self.context['request'].user
+        user = self.context["request"].user
         try:
             return (
                 user.is_authenticated and
@@ -77,10 +76,10 @@ class GetRecipeSerializer(serializers.ModelSerializer):
 
 
 class PostRecipeSerializer(serializers.ModelSerializer):
-    ingredients = IngredientRecipeSerializer(many=True)
+    ingredients = PostIngredientSerializer(many=True)
     tags = serializers.ListField(
         child=serializers.SlugRelatedField(
-            slug_field='id',
+            slug_field="id",
             queryset=models.Tag.objects.all(),
         ),
     )
@@ -89,19 +88,40 @@ class PostRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Recipe
         fields = (
-            'ingredients', 'tags', 'image', 'name', 'text', 'cooking_time',
+            "ingredients", "tags", "image", "name", "text", "cooking_time",
         )
+
+    def validate(self, attrs):
+        if attrs['cooking_time'] < 1:
+            raise serializers.ValidationError(
+                'Время приготовления не может быть меньше одной минуты!')
+        if len(attrs['tags']) == 0:
+            raise serializers.ValidationError(
+                'Рецепт не может быть без тегов!')
+        if len(attrs['tags']) > len(set(attrs['tags'])):
+            raise serializers.ValidationError(
+                'Теги не могут повторяться!')
+        if len(attrs['ingredients']) == 0:
+            raise serializers.ValidationError(
+                'Без ингредиентов рецепта не бывает!')
+        for ingredient in attrs['ingredients']:
+            if ingredient['quantity'] < 1:
+                raise serializers.ValidationError(
+                     'Количество ингредиента не может быть меньше 1!'
+                    )
+        return attrs
 
     def add_ingredients_and_tags(self, instance, validated_data):
         ingredients, tags = (
-            validated_data.pop('ingredients'), validated_data.pop('tags')
+            self.context["request"].data['ingredients'], validated_data.pop(
+                'tags')
         )
         for ingredient in ingredients:
             quantity_of_ingredient, _ = (
                 models.IngredientRecipe.objects.get_or_create(
                     ingredient=get_object_or_404(
                         models.Ingredient,
-                        pk=ingredient['id']
+                        id=ingredient['id'],
                     ),
                     quantity=ingredient['quantity'],)
                 )
@@ -112,8 +132,8 @@ class PostRecipeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         saved = {}
-        saved['ingredients'] = validated_data.pop('ingredients')
-        saved['tags'] = validated_data.pop('tags')
+        saved["ingredients"] = validated_data.pop("ingredients")
+        saved["tags"] = validated_data.pop("tags")
         recipe = models.Recipe.objects.create(**validated_data)
         return self.add_ingredients_and_tags(recipe, saved)
 

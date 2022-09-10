@@ -19,19 +19,19 @@ from .serializers import (GetRecipeSerializer, IngredientSerializer,
 class TagViewSet(ListRetriveViewSet):
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
-    http_method_names = ('get',)
+    http_method_names = ("get",)
 
 
 class IngredientViewSet(ListRetriveViewSet):
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
-    http_method_names = ('get',)
+    http_method_names = ("get",)
 
 
 class RecipeViewSet(ModelViewSet):
     filter_backends = (DjangoFilterBackend,)
     queryset = Recipe.objects.all()
-    http_method_names = ('get', 'post', 'put', 'patch', 'delete',)
+    http_method_names = ("get", "post", "put", "patch", "delete",)
 
     def get_serializer_class(self):
         if self.request.method in SAFE_METHODS:
@@ -47,7 +47,7 @@ class RecipeViewSet(ModelViewSet):
         self.perform_create(serializer)
         serializer = GetRecipeSerializer(
             instance=serializer.instance,
-            context={'request': self.request}
+            context={"request": self.request}
         )
         headers = self.get_success_headers(serializer.data)
         return Response(
@@ -55,7 +55,7 @@ class RecipeViewSet(ModelViewSet):
         )
 
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
         serializer = self.get_serializer(
             instance, data=request.data, partial=partial
@@ -64,7 +64,7 @@ class RecipeViewSet(ModelViewSet):
         self.perform_update(serializer)
         serializer = GetRecipeSerializer(
             instance=serializer.instance,
-            context={'request': self.request},
+            context={"request": self.request},
         )
         return Response(
             serializer.data, status=HTTP_200_OK
@@ -75,7 +75,7 @@ class RecipeViewSet(ModelViewSet):
             Favorites.objects.create(user=request.user, favorit_recipe=recipe)
         except IntegrityError:
             return Response(
-                {'errors': 'Уже добавлено в избранное'},
+                {"errors": "Уже добавлено в избранное"},
                 status=HTTP_400_BAD_REQUEST,
             )
         serializer = FavoritRecipeSerializer(recipe)
@@ -91,19 +91,19 @@ class RecipeViewSet(ModelViewSet):
         )
         if not favorite.exists():
             return Response(
-                {'errors': 'Такого рецерта нет в избранном'},
+                {"errors": "Такого рецерта нет в избранном"},
                 status=HTTP_400_BAD_REQUEST,
             )
         favorite.delete()
         return Response(status=HTTP_204_NO_CONTENT)
 
     @action(
-        methods=('post', 'delete',),
+        methods=("post", "delete",),
         detail=True,
         permission_classes=(IsAuthenticated,)
     )
     def favorite(self, request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
-        if request.method == 'POST':
+        if request.method == "POST":
             return self.add_to_favorite(request, recipe)
         return self.delete_from_favorite(request, recipe)

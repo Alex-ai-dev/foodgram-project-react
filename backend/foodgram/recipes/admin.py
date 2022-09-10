@@ -36,7 +36,6 @@ class RecipeAdmin(ModelAdmin):
 class IngredientRecipeAdmin(ModelAdmin):
     list_display = (
         'id', 'ingredient', 'quantity', 'get_measurement_unit',
-        'get_recipes_count',
     )
     readonly_fields = ('get_measurement_unit',)
     list_filter = ('ingredient',)
@@ -49,10 +48,6 @@ class IngredientRecipeAdmin(ModelAdmin):
             return obj.ingredient.measurement_unit
         except IngredientRecipe.ingredient.RelatedObjectDoesNotExist:
             return '< Тут Пусто >'
-
-    @display(description='Количество ссылок в рецептах')
-    def get_recipes_count(self, obj):
-        return obj.recipes.count()
 
 
 @register(Favorites)

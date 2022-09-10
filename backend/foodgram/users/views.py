@@ -18,7 +18,7 @@ from .models import Follow, ShoppingCart, User
 from .serializers import (FavoritRecipeSerializer,
                           FollowSerializer)
 
-FILE_NAME = 'shopping_cart.txt'
+FILE_NAME = "shopping_cart.txt"
 
 
 class TokenCreateWithCheckBlockStatusView(TokenCreateView):
@@ -28,10 +28,10 @@ class TokenCreateWithCheckBlockStatusView(TokenCreateView):
 
 class UserFollowViewSet(UserViewSet):
     pagination_class = PageLimitPagination
-    lookup_url_kwarg = 'user_id'
+    lookup_url_kwarg = "user_id"
 
     def get_subscribtion_serializer(self, *args, **kwargs):
-        kwargs.setdefault('context', self.get_serializer_context())
+        kwargs.setdefault("context", self.get_serializer_context())
         return FollowSerializer(*args, **kwargs)
 
     @action(detail=False, permission_classes=(IsAuthenticated,))
@@ -48,7 +48,7 @@ class UserFollowViewSet(UserViewSet):
     def create_Follow(self, request, author):
         if request.user == author:
             return Response(
-                {'errors': 'Нельзя подписаться на самого себя!'},
+                {"errors": "Нельзя подписаться на самого себя!"},
                 status=HTTP_400_BAD_REQUEST,
             )
         try:
@@ -58,7 +58,7 @@ class UserFollowViewSet(UserViewSet):
             )
         except IntegrityError:
             return Response(
-                {'errors': 'Нельзя подписаться дважды!'},
+                {"errors": "Нельзя подписаться дважды!"},
                 status=HTTP_400_BAD_REQUEST,
             )
         serializer = self.get_subscribtion_serializer(Subscribe.author)
@@ -70,9 +70,9 @@ class UserFollowViewSet(UserViewSet):
         except Follow.DoesNotExist:
             return Response(
                 {
-                    'errors':
-                    'Нельзя отписаться от данного пользователя,'
-                    'если вы не подписаны на него!'
+                    "errors":
+                    "Нельзя отписаться от данного пользователя,"
+                    "если вы не подписаны на него!"
                 },
                 status=HTTP_400_BAD_REQUEST,
             )
@@ -81,7 +81,7 @@ class UserFollowViewSet(UserViewSet):
         )
 
     @action(
-        methods=('POST', 'delete',),
+        methods=("POST", "delete",),
         detail=True,
         permission_classes=(IsAuthenticated,)
     )
@@ -90,39 +90,39 @@ class UserFollowViewSet(UserViewSet):
             author = get_object_or_404(User, pk=user_id)
         except Http404:
             return Response(
-                {'detail': 'Пользователь не найден!'},
+                {"detail": "Пользователь не найден!"},
                 status=HTTP_404_NOT_FOUND,
             )
-        if request.method == 'POST':
+        if request.method == "POST":
             return self.create_Follow(request, author)
         return self.delete_Follow(request, author)
 
 
 class ShoppingCartViewSet(GenericViewSet):
-    NAME = 'ingredients__ingredient__name'
-    MEASUREMENT_UNIT = 'ingredients__ingredient__measurement_unit'
+    NAME = "ingredients__ingredient__name"
+    MEASUREMENT_UNIT = "ingredients__ingredient__measurement_unit"
     permission_classes = (IsAuthenticated,)
     serializer_class = FavoritRecipeSerializer
     queryset = ShoppingCart.objects.all()
-    http_method_names = ('post', 'delete',)
+    http_method_names = ("post", "delete",)
 
     def generate_shopping_cart_data(self, request):
         recipes = (
-            request.user.shopping_cart.recipes.prefetch_related('ingredients')
+            request.user.shopping_cart.recipes.prefetch_related("ingredients")
         )
         return (
             recipes.order_by(self.NAME)
             .values(self.NAME, self.MEASUREMENT_UNIT)
-            .annotate(total=Sum('ingredients__quantity'))
+            .annotate(total=Sum("ingredients__quantity"))
         )
 
     def generate_ingredients_content(self, ingredients):
-        content = ''
+        content = ""
         for ingredient in ingredients:
             content += (
-                f'{ingredient[self.NAME]}'
-                f' ({ingredient[self.MEASUREMENT_UNIT]})'
-                f' — {ingredient["total"]}\r\n'
+                f"{ingredient[self.NAME]}"
+                f" ({ingredient[self.MEASUREMENT_UNIT]})"
+                f" — {ingredient['total']}\r\n"
             )
         return content
 
@@ -132,20 +132,20 @@ class ShoppingCartViewSet(GenericViewSet):
             ingredients = self.generate_shopping_cart_data(request)
         except ShoppingCart.DoesNotExist:
             return Response(
-                {'errors': 'Список покупок не существует!'},
+                {"errors": "Список покупок не существует!"},
                 status=HTTP_400_BAD_REQUEST
             )
         content = self.generate_ingredients_content(ingredients)
         response = HttpResponse(
-            content, content_type='text/plain,charset=utf8'
+            content, content_type="text/plain,charset=utf8"
         )
-        response['Content-Disposition'] = f'attachment; filename={FILE_NAME}'
+        response["Content-Disposition"] = f"attachment; filename={FILE_NAME}"
         return response
 
     def add_to_shopping_cart(self, request, recipe, shopping_cart):
         if shopping_cart.recipes.filter(pk__in=(recipe.pk,)).exists():
             return Response(
-                {'errors': 'Рецепт уже добавлен!'},
+                {"errors": "Рецепт уже добавлен!"},
                 status=HTTP_400_BAD_REQUEST,
             )
         shopping_cart.recipes.add(recipe)
@@ -159,9 +159,9 @@ class ShoppingCartViewSet(GenericViewSet):
         if not shopping_cart.recipes.filter(pk__in=(recipe.pk,)).exists():
             return Response(
                 {
-                    'errors':
-                    'Нельзя удалить рецепт из списка покупок,'
-                    'которого нет в списке покупок!'
+                    "errors":
+                    "Нельзя удалить рецепт из списка покупок,"
+                    "которого нет в списке покупок!"
                 },
                 status=HTTP_400_BAD_REQUEST,
             )
@@ -170,12 +170,12 @@ class ShoppingCartViewSet(GenericViewSet):
             status=HTTP_204_NO_CONTENT,
         )
 
-    @action(methods=('post', 'delete',), detail=True)
+    @action(methods=("post", "delete",), detail=True)
     def shopping_cart(self, request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
         shopping_cart = (
             ShoppingCart.objects.get_or_create(user=request.user)[0]
         )
-        if request.method == 'POST':
+        if request.method == "POST":
             return self.add_to_shopping_cart(request, recipe, shopping_cart)
         return self.remove_from_shopping_cart(request, recipe, shopping_cart)

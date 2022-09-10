@@ -6,21 +6,21 @@ from .views import (ShoppingCartViewSet, TokenCreateWithCheckBlockStatusView,
                     UserFollowViewSet)
 
 router = DefaultRouter()
-router.register(r'users', UserFollowViewSet, basename='users')
-router.register(r'recipes', ShoppingCartViewSet, basename='shopping_cart')
+router.register(r"users", UserFollowViewSet, basename="users")
+router.register(r"recipes", ShoppingCartViewSet, basename="shopping_cart")
 
-app_name = 'users'
+app_name = "users"
 
 authorization = [
     path(
-        'token/login/',
+        "token/login/",
         TokenCreateWithCheckBlockStatusView.as_view(),
         name="login",
     ),
-    path('token/logout/', TokenDestroyView.as_view(), name="logout"),
+    path("token/logout/", TokenDestroyView.as_view(), name="logout"),
 ]
 
 urlpatterns = [
-    path('auth/', include(authorization)),
-    path('', include(router.urls)),
+    path("auth/", include(authorization)),
+    path("", include(router.urls)),
 ]

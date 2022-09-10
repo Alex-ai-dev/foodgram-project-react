@@ -9,39 +9,39 @@ from .models import Follow, ShoppingCart, User
 class UserAdmin(UserAdmin):
     model = User
     list_display = (
-        'id', 'email', 'username', 'first_name', 'last_name',
-        'is_superuser',
+        "id", "email", "username", "first_name", "last_name",
+        "is_superuser",
     )
     list_filter = (
-        'email', 'username', 'is_superuser',
+        "email", "username", "is_superuser",
     )
-    search_fields = ('email', 'username', 'first_name', 'last_name',)
-    ordering = ('id', 'email', 'username',)
+    search_fields = ("email", "username", "first_name", "last_name",)
+    ordering = ("id", "email", "username",)
 
 
 @register(Follow)
 class FollowAdmin(ModelAdmin):
-    list_display = ('user', 'author',)
-    empty_value_display = '< Тут Пусто >'
+    list_display = ("user", "author",)
+    empty_value_display = "< Тут Пусто >"
 
     class Meta:
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
 
 
 @register(ShoppingCart)
 class ShoppingCartAdmin(ModelAdmin):
-    list_display = ('user', 'count_ingredients',)
-    readonly_fields = ('count_ingredients',)
-    empty_value_display = '< Тут Пусто >'
+    list_display = ("user", "count_ingredients",)
+    readonly_fields = ("count_ingredients",)
+    empty_value_display = "< Тут Пусто >"
 
     class Meta:
-        verbose_name = 'Список покупок'
-        verbose_name_plural = 'Списки покупок'
+        verbose_name = "Список покупок"
+        verbose_name_plural = "Списки покупок"
 
-    @display(description='Количество ингредиентов')
+    @display(description="Количество ингредиентов")
     def count_ingredients(self, obj):
         return (
-            obj.recipes.all().annotate(count_ingredients=Count('ingredients'))
-            .aggregate(total=Sum('count_ingredients'))['total']
+            obj.recipes.all().annotate(count_ingredients=Count("ingredients"))
+            .aggregate(total=Sum("count_ingredients"))["total"]
         )
