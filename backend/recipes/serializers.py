@@ -95,13 +95,13 @@ class PostRecipeSerializer(serializers.ModelSerializer):
         if attrs['cooking_time'] < 1:
             raise serializers.ValidationError(
                 'Время приготовления не может быть меньше одной минуты!')
-        if len(attrs['tags']) == 0:
+        if not attrs['tags']:
             raise serializers.ValidationError(
                 'Рецепт не может быть без тегов!')
         if len(attrs['tags']) > len(set(attrs['tags'])):
             raise serializers.ValidationError(
                 'Теги не могут повторяться!')
-        if len(attrs['ingredients']) == 0:
+        if not attrs['ingredients']:
             raise serializers.ValidationError(
                 'Без ингредиентов рецепта не бывает!')
         for ingredient in attrs['ingredients']:
