@@ -80,6 +80,13 @@ DATABASES = {
     }
 }
 
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'backend_static')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media/'
+
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
 
@@ -133,8 +140,7 @@ REST_FRAMEWORK = {
 DJOSER = {
     'SERIALIZERS': {
         'user': 'users.serializers.AuthorSerializer',
-        'user_create': 'users.serializers.AuthorSerializer',
-        'current_user': 'users.serializers.AuthorSerializer',
+        'user_create': 'users.serializers.UserRegistrationSerializer',
     },
     'PERMISSIONS': {
         'user_list': ('rest_framework.permissions.AllowAny',),
@@ -142,3 +148,5 @@ DJOSER = {
     },
     'HIDE_USERS': False,
 }
+
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.AllowAllUsersModelBackend']

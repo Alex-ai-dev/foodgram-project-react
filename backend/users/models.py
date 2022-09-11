@@ -3,7 +3,7 @@ from django.db import models
 
 
 class User(AbstractUser):
-    REQUIRED_FIELDS = ["email", "first_name", "last_name"]
+    REQUIRED_FIELDS = ["username", "first_name", "last_name"]
     email = models.EmailField(
         verbose_name="E-mail",
         unique=True,
@@ -12,6 +12,7 @@ class User(AbstractUser):
     )
     first_name = models.CharField(max_length=30, blank=False)
     last_name = models.CharField(max_length=150, blank=False)
+    USERNAME_FIELD = 'email'
 
 
 class Follow(models.Model):
