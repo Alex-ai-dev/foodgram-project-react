@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-e&8@$cw6=p017kpz-=q+o1il!poo#!t@cdnfnw!2nx#03$38#i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['yandextube.sytes.net']
+ALLOWED_HOSTS = ['yandextube.sytes.net', 'web', 'web:8000']
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -73,13 +73,24 @@ DATABASES = {
     'default': {
         'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
         'NAME': os.getenv('DB_NAME', default='postgres'),
+        'USER': 'postgres',
+        'PASSWORD': 'postgresql',
+        'HOST': 'db',
+        'PORT': 5432
+    }
+}
+"""
+DATABASES = {
+    'default': {
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', default='postgres'),
         'USER': os.getenv('POSTGRES_USER', default=None),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', default=None),
         'HOST': os.getenv('DB_HOST', default=None),
         'PORT': os.getenv('DB_PORT', default=None)
     }
 }
-
+"""
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'backend_static')

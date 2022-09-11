@@ -18,8 +18,8 @@ services:
     build: ../backend
     restart: always
     volumes:
-      - static_value:/app/backend_static/
-      - media_value:/app/media/
+      - static_value:/code/backend_static/
+      - media_value:/code/media/
     depends_on:
       - db
     env_file:
