@@ -2,7 +2,7 @@ from django.contrib.auth.hashers import make_password
 from recipes.models import Recipe
 from rest_framework import serializers
 from djoser.serializers import (
-    UserCreateSerializer as BaseUserRegistrationSerializer
+    UserCreateSerializer
 )
 
 from .models import User
@@ -33,8 +33,8 @@ class AuthorSerializer(serializers.ModelSerializer):
         )
         return super().create(validated_data)
 
-class UserRegistrationSerializer(BaseUserRegistrationSerializer):
-    class Meta(BaseUserRegistrationSerializer.Meta):
+class UserRegistrationSerializer(UserCreateSerializer):
+    class Meta(UserCreateSerializer.Meta):
         model = User
         fields = [
             'email', 'id', 'username', 'first_name', 'last_name', 'password'
