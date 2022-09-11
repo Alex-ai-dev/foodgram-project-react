@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-e&8@$cw6=p017kpz-=q+o1il!poo#!t@cdnfnw!2nx#03$38#i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['yandextube.sytes.net']
 
 AUTH_USER_MODEL = 'users.User'
 
