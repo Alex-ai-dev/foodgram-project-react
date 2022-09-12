@@ -126,7 +126,7 @@ class ShoppingCartViewSet(GenericViewSet):
             )
         return content
 
-    @action(detail=False)
+    @action(methods=("get",), detail=False)
     def download_shopping_cart(self, request):
         try:
             ingredients = self.generate_shopping_cart_data(request)
