@@ -1,10 +1,13 @@
 from django.db.models import IntegerField, Value
 from django_filters.rest_framework import (
+    AllValuesMultipleFilter,
+    BooleanFilter,
     CharFilter,
     FilterSet
 )
 
-from .models import Ingredient
+from users.models import ShoppingCart
+from .models import Ingredient, Recipe
 
 
 class IngredientSearchFilter(FilterSet):
@@ -30,3 +33,33 @@ class IngredientSearchFilter(FilterSet):
             )
         )
         return start_with_queryset.union(contain_queryset).order_by('order')
+
+class RecipeFilter(FilterSet):
+    is_favorited = BooleanFilter(method='get_is_favorited')
+    is_in_shopping_cart = BooleanFilter(method='get_is_in_shopping_cart')
+    tags = AllValuesMultipleFilter(field_name='tags__slug')
+
+    class Meta:
+        model = Recipe
+        fields = ('author',)
+
+    def get_is_favorited(self, queryset, name, value):
+        if not value:
+            return queryset
+        favorites = self.request.user.client.all()
+        return queryset.filter(
+            pk__in=(favorite.recipe.pk for favorite in favorites)
+        )
+
+    def get_is_in_shopping_cart(self, queryset, name, value):
+        if not value:
+            return queryset
+        try:
+            recipes = (
+                self.request.user.shopping_cart.recipes.all()
+            )
+        except ShoppingCart.DoesNotExist:
+            return queryset
+        return queryset.filter(
+            pk__in=(recipe.pk for recipe in recipes)
+        )
