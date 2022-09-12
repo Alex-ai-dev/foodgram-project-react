@@ -32,24 +32,6 @@ class RecipeAdmin(ModelAdmin):
         return obj.favorites.count()
 
 
-@register(IngredientRecipe)
-class IngredientRecipeAdmin(ModelAdmin):
-    list_display = (
-        'id', 'ingredient', 'amount', 'get_measurement_unit',
-    )
-    readonly_fields = ('get_measurement_unit',)
-    list_filter = ('ingredient',)
-    ordering = ('ingredient',)
-    empty_value_display = '< Тут Пусто >'
-
-    @display(description='Единица измерения')
-    def get_measurement_unit(self, obj):
-        try:
-            return obj.ingredient.measurement_unit
-        except IngredientRecipe.ingredient.RelatedObjectDoesNotExist:
-            return '< Тут Пусто >'
-
-
 @register(Favorites)
 class FavoritesAdmin(ModelAdmin):
     list_display = ('user', 'favorit_recipe',)
