@@ -45,7 +45,7 @@ class RecipeFilter(FilterSet):
 
     def get_is_favorited(self, queryset, name, value):
         if not value:
-            return queryset
+            return None
         favorites = self.request.user.client.all()
         return queryset.filter(
             pk__in=(favorite.favorit_recipe.pk for favorite in favorites)
