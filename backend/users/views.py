@@ -85,7 +85,7 @@ class UserFollowViewSet(UserViewSet):
         detail=True,
         permission_classes=(IsAuthenticated,)
     )
-    def Subscribe(self, request, user_id=None):
+    def subscribe(self, request, user_id=None):
         try:
             author = get_object_or_404(User, pk=user_id)
         except Http404:
