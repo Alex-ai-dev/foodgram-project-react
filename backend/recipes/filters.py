@@ -48,7 +48,7 @@ class RecipeFilter(FilterSet):
             return queryset
         favorites = self.request.user.client.all()
         return queryset.filter(
-            pk__in=(favorite.recipe.pk for favorite in favorites)
+            pk__in=(favorite.favorit_recipes.pk for favorite in favorites)
         )
 
     def get_is_in_shopping_cart(self, queryset, name, value):
