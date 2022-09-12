@@ -30,7 +30,7 @@ class GetIngredientRecipeSerializer(serializers.ModelSerializer):
 class PostIngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.IngredientRecipe
-        fields = ("id", "quantity")
+        fields = ("id", "amount")
 
 
 class GetIngredientSerializer(serializers.ModelSerializer):
@@ -41,7 +41,7 @@ class GetIngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.IngredientRecipe
-        fields = ("id", "name", "measurement_unit", "quantity")
+        fields = ("id", "name", "measurement_unit", "amount")
 
 
 class GetRecipeSerializer(serializers.ModelSerializer):
@@ -83,7 +83,7 @@ class PostRecipeSerializer(serializers.ModelSerializer):
             queryset=models.Tag.objects.all(),
         ),
     )
-    image = Base64ImageField()
+    # image = serializers.ImageField()
 
     class Meta:
         model = models.Recipe
@@ -105,7 +105,7 @@ class PostRecipeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Без ингредиентов рецепта не бывает!')
         for ingredient in attrs['ingredients']:
-            if ingredient['quantity'] < 1:
+            if ingredient['amount'] < 1:
                 raise serializers.ValidationError(
                      'Количество ингредиента не может быть меньше 1!'
                     )
@@ -117,15 +117,15 @@ class PostRecipeSerializer(serializers.ModelSerializer):
                 'tags')
         )
         for ingredient in ingredients:
-            quantity_of_ingredient, _ = (
+            amount_of_ingredient, _ = (
                 models.IngredientRecipe.objects.get_or_create(
                     ingredient=get_object_or_404(
                         models.Ingredient,
                         id=ingredient['id'],
                     ),
-                    quantity=ingredient['quantity'],)
+                    amount=ingredient['amount'],)
                 )
-            instance.ingredients.add(quantity_of_ingredient)
+            instance.ingredients.add(amount_of_ingredient)
         for tag in tags:
             instance.tags.add(tag)
         return instance

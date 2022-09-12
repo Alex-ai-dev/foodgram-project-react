@@ -113,7 +113,7 @@ class ShoppingCartViewSet(GenericViewSet):
         return (
             recipes.order_by(self.NAME)
             .values(self.NAME, self.MEASUREMENT_UNIT)
-            .annotate(total=Sum("ingredients__quantity"))
+            .annotate(total=Sum("ingredients__amount"))
         )
 
     def generate_ingredients_content(self, ingredients):

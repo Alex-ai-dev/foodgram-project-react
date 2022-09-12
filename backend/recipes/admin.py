@@ -35,7 +35,7 @@ class RecipeAdmin(ModelAdmin):
 @register(IngredientRecipe)
 class IngredientRecipeAdmin(ModelAdmin):
     list_display = (
-        'id', 'ingredient', 'quantity', 'get_measurement_unit',
+        'id', 'ingredient', 'amount', 'get_measurement_unit',
     )
     readonly_fields = ('get_measurement_unit',)
     list_filter = ('ingredient',)

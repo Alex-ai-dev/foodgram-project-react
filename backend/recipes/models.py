@@ -45,7 +45,7 @@ class IngredientRecipe(models.Model):
         on_delete=models.CASCADE, related_name="IngredientRecipe",
         verbose_name="Ингредиент"
     )
-    quantity = models.PositiveIntegerField(
+    amount = models.PositiveIntegerField(
         verbose_name="Количество"
     )
 
@@ -55,7 +55,7 @@ class IngredientRecipe(models.Model):
 
     def __str__(self):
         return (
-            f"{self.ingredient.name} - {self.quantity}"
+            f"{self.ingredient.name} - {self.amount}"
             f" ({self.ingredient.measurement_unit})"
         )
 

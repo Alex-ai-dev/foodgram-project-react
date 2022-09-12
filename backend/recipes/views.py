@@ -10,6 +10,7 @@ from rest_framework.viewsets import ModelViewSet
 from users.serializers import FavoritRecipeSerializer
 
 from foodgram.mixins import ListRetriveViewSet
+from foodgram.pagination import PageLimitPagination
 
 from .models import Favorites, Ingredient, Recipe, Tag
 from .serializers import (GetRecipeSerializer, IngredientSerializer,
@@ -29,6 +30,7 @@ class IngredientViewSet(ListRetriveViewSet):
 
 
 class RecipeViewSet(ModelViewSet):
+    pagination_class=PageLimitPagination
     filter_backends = (DjangoFilterBackend,)
     queryset = Recipe.objects.all()
     http_method_names = ("get", "post", "put", "patch", "delete",)
