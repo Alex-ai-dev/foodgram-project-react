@@ -15,6 +15,7 @@ from foodgram.pagination import PageLimitPagination
 from .models import Favorites, Ingredient, Recipe, Tag
 from .serializers import (GetRecipeSerializer, IngredientSerializer,
                           PostRecipeSerializer, TagSerializer)
+from .filters import IngredientSearchFilter
 
 
 class TagViewSet(ListRetriveViewSet):
@@ -25,6 +26,8 @@ class TagViewSet(ListRetriveViewSet):
 
 class IngredientViewSet(ListRetriveViewSet):
     serializer_class = IngredientSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = IngredientSearchFilter
     queryset = Ingredient.objects.all()
     http_method_names = ("get",)
 

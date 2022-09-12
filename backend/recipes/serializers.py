@@ -83,7 +83,7 @@ class PostRecipeSerializer(serializers.ModelSerializer):
             queryset=models.Tag.objects.all(),
         ),
     )
-    # image = serializers.ImageField()
+    image = Base64ImageField()
 
     class Meta:
         model = models.Recipe
