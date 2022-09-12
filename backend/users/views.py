@@ -104,7 +104,7 @@ class ShoppingCartViewSet(GenericViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = FavoritRecipeSerializer
     queryset = ShoppingCart.objects.all()
-    http_method_names = ("post", "delete",)
+    http_method_names = ("get", "post", "delete",)
 
     def generate_shopping_cart_data(self, request):
         recipes = (
